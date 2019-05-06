@@ -17,13 +17,13 @@ public class Client extends JFrame implements ActionListener {
     private Socket client;
 
     public Client(String servername) throws Exception {
-        super("Chatroom - localhost");
+        super("Chatroom - @localhost:6969");
+        this.client  = new Socket(servername,6969);
+        this.br = new BufferedReader( new InputStreamReader( client.getInputStream()) ) ;
+        this.pw = new PrintWriter(client.getOutputStream(),true);
         while (true) {
             String name = JOptionPane.showInputDialog(null,"Username : ", "Join Chatroom",
                     JOptionPane.PLAIN_MESSAGE);
-            this.client  = new Socket(servername,6969);
-            this.br = new BufferedReader( new InputStreamReader( client.getInputStream()) ) ;
-            this.pw = new PrintWriter(client.getOutputStream(),true);
             this.pw.println(name);
             String resp = br.readLine();
             if (!resp.equals("used")) {
@@ -78,12 +78,16 @@ public class Client extends JFrame implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent evt) {
-        if ( evt.getSource() == exit ) {
+        if (evt.getSource() == exit) {
             pw.println("end");
             System.exit(1);
         } else {
-            pw.println(input.getText());
-            input.setText("");
+            try {
+                pw.println(input.getText());
+                input.setText("");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -91,6 +95,7 @@ public class Client extends JFrame implements ActionListener {
         try {
             new Client("localhost");
         } catch (Exception e) {
+            System.out.println("Koneksi Gagal");
             e.printStackTrace();
         }
     }
@@ -102,7 +107,7 @@ public class Client extends JFrame implements ActionListener {
                 while(true) {
                     try {
                         msg = br.readLine();
-                        messages.append(msg + "\n");
+                        messages.append(msg +"\n");
                     } catch (SocketException e) {
                         messages.append("-- Koneksi dengan server terputus, harap membuka ulang aplikasi\n");
                         input.setEditable(false);
